@@ -128,3 +128,7 @@ Para contribuir ou modificar o código-fonte, siga estas etapas:
    ```bash
    npm start -- gen
    ```
+
+## Licença
+
+Este projeto está licenciado sob a [Licença ISC](./LICENSE).
