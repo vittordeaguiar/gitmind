@@ -98,6 +98,19 @@ export const genCommand = new Command("gen")
 
       if (action === "commit" || action === "edit") {
         await gitService.commit(commitMessage);
+
+        const { shouldPush } = await inquirer.prompt([
+          {
+            type: "confirm",
+            name: "shouldPush",
+            message: "Deseja fazer push das suas mudanças agora?",
+            default: true,
+          },
+        ]);
+
+        if (shouldPush) {
+          await gitService.push();
+        }
       }
     } catch (error: any) {
       console.error(chalk.red(`Ocorreu um erro inesperado: ${error.message}`));

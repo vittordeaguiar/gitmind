@@ -14,4 +14,5 @@ export interface IAIService {
 export interface GitService {
   getStagedDiff(): Promise<string>;
   commit(message: CommitMessage): Promise<void>;
+  push(): Promise<void>;
 }

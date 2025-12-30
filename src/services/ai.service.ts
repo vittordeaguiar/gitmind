@@ -1,17 +1,17 @@
-import { generateText, streamText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { createAnthropic } from '@ai-sdk/anthropic';
+import { generateText, streamText } from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createAnthropic } from "@ai-sdk/anthropic";
 // import { createOllama } from 'ollama-ai-provider';
 
-import { IAIService, CommitMessage } from '../core/types.js';
-import { SYSTEM_PROMPT } from '../core/prompt.js';
+import { IAIService, CommitMessage } from "../core/types.js";
+import { SYSTEM_PROMPT } from "../core/prompt.js";
 
 export enum AIProvider {
-  OpenAI = 'openai',
-  Google = 'google',
-  Anthropic = 'anthropic',
-  Ollama = 'ollama',
+  OpenAI = "openai",
+  Google = "google",
+  Anthropic = "anthropic",
+  Ollama = "ollama",
 }
 
 export interface AIConfig {
@@ -22,7 +22,9 @@ export interface AIConfig {
 
 export class AIServiceImpl implements IAIService {
   private config: AIConfig;
-  private aiClient: ReturnType<typeof createOpenAI | typeof createGoogleGenerativeAI | typeof createAnthropic>;
+  private aiClient: ReturnType<
+    typeof createOpenAI | typeof createGoogleGenerativeAI | typeof createAnthropic
+  >;
 
   constructor(config: AIConfig) {
     this.config = config;
@@ -39,7 +41,7 @@ export class AIServiceImpl implements IAIService {
         return createAnthropic({ apiKey: config.apiKey });
       case AIProvider.Ollama:
         // TODO: Implementar a integração com ollama-ai-provider
-        throw new Error('Ollama provider not yet implemented.');
+        throw new Error("Ollama provider not yet implemented.");
       default:
         throw new Error(`Unknown AI provider: ${config.provider}`);
     }
@@ -56,28 +58,30 @@ export class AIServiceImpl implements IAIService {
       const commitMessageRaw = result.text.trim();
 
       // TODO: Implementar a lógica de parsing para CommitMessage
-      // Por enquanto, uma implementação mock para não bloquear
       return this.parseCommitMessage(commitMessageRaw);
-
     } catch (error: any) {
-      console.error('Error generating commit message with AI:', error.message);
+      console.error("Error generating commit message with AI:", error.message);
       throw new Error(`Failed to generate commit message: ${error.message}`);
     }
   }
 
   private parseCommitMessage(rawMessage: string): CommitMessage {
-    const lines = rawMessage.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    const firstLine = lines.shift() || '';
+    const lines = rawMessage
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+    const firstLine = lines.shift() || "";
 
-    const headerMatch = firstLine.match(/^(?<type>[a-z]+)(\((?<scope>[a-zA-Z0-9_-]+)\))?(?<breaking>!)?: (?<subject>.+)$/);
+    const headerMatch = firstLine.match(
+      /^(?<type>[a-z]+)(\((?<scope>[a-zA-Z0-9_-]+)\))?(?<breaking>!)?: (?<subject>.+)$/
+    );
 
     if (!headerMatch || !headerMatch.groups) {
-      // Fallback para um formato mais simples ou lançar erro
-      console.warn('Could not parse AI generated commit message header. Using raw subject.');
+      console.warn("Could not parse AI generated commit message header. Using raw subject.");
       return {
-        type: 'chore', // Default type
+        type: "chore",
         subject: firstLine,
-        body: lines.join('\n') || undefined,
+        body: lines.join("\n") || undefined,
       };
     }
 
@@ -87,22 +91,22 @@ export class AIServiceImpl implements IAIService {
     let footer: string | undefined;
     let isBreakingChange = !!breaking;
 
-    const bodyAndFooter = lines.join('\n');
-    const breakingChangeMarker = 'BREAKING CHANGE:';
+    const bodyAndFooter = lines.join("\n");
+    const breakingChangeMarker = "BREAKING CHANGE:";
     const breakingChangeIndex = bodyAndFooter.indexOf(breakingChangeMarker);
 
     if (breakingChangeIndex !== -1) {
       body = bodyAndFooter.substring(0, breakingChangeIndex).trim() || undefined;
       footer = bodyAndFooter.substring(breakingChangeIndex).trim() || undefined;
       isBreakingChange = true;
-    } else if (bodyAndFooter.startsWith('Refs #') || bodyAndFooter.startsWith('Closes #')) {
+    } else if (bodyAndFooter.startsWith("Refs #") || bodyAndFooter.startsWith("Closes #")) {
       footer = bodyAndFooter;
     } else {
       body = bodyAndFooter || undefined;
     }
 
     return {
-      type: type || 'chore',
+      type: type || "chore",
       scope: scope || undefined,
       subject: subject,
       body: body,
