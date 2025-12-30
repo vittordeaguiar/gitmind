@@ -131,4 +131,5 @@ To contribute or modify the source code, follow these steps:
 
 ## Entre em contato comigo para melhorias ou dúvidas!
 
-## License\n\nThis project is licensed under the [ISC License](./LICENSE).
+## License
+This project is licensed under the [ISC License](./LICENSE).
