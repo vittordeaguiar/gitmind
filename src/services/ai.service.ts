@@ -2,8 +2,7 @@ import { generateText, streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
-// import { createOllama } from 'ollama-ai-provider';
-
+import { createOllama } from 'ollama-ai-provider';
 import { IAIService, CommitMessage } from "../core/types.js";
 import { SYSTEM_PROMPT } from "../core/prompt.js";
 
@@ -23,7 +22,7 @@ export interface AIConfig {
 export class AIServiceImpl implements IAIService {
   private config: AIConfig;
   private aiClient: ReturnType<
-    typeof createOpenAI | typeof createGoogleGenerativeAI | typeof createAnthropic
+    typeof createOpenAI | typeof createGoogleGenerativeAI | typeof createAnthropic | typeof createOllama
   >;
 
   constructor(config: AIConfig) {
@@ -40,8 +39,7 @@ export class AIServiceImpl implements IAIService {
       case AIProvider.Anthropic:
         return createAnthropic({ apiKey: config.apiKey });
       case AIProvider.Ollama:
-        // TODO: Implementar a integração com ollama-ai-provider
-        throw new Error("Ollama provider not yet implemented.");
+        return createOllama({ baseURL: config.apiKey.startsWith('http') ? config.apiKey : undefined });
       default:
         throw new Error(`Unknown AI provider: ${config.provider}`);
     }

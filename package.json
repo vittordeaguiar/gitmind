@@ -11,7 +11,9 @@
     "dev": "tsx src/index.ts",
     "build": "tsc",
     "start": "node dist/index.ts",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
   "keywords": [],
   "author": "vittordeaguiar",
@@ -33,6 +35,7 @@
     "@types/inquirer": "^9.0.9",
     "@types/node": "^25.0.3",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }

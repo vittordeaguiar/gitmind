@@ -67,16 +67,28 @@ export const configCommand = new Command("config")
 
     let apiKey = options.apiKey || currentConfig.apiKey;
     if (!apiKey) {
-      const answers = await inquirer.prompt([
-        {
-          type: "password",
-          name: "apiKey",
-          message: `Digite sua API Key para ${provider}:
+      if (provider === AIProvider.Ollama) {
+        const answers = await inquirer.prompt([
+          {
+            type: "input",
+            name: "apiKey",
+            message: "Digite a Base URL do Ollama (pressione Enter para usar o padrão http://127.0.0.1:11434):",
+            default: "http://127.0.0.1:11434",
+          },
+        ]);
+        apiKey = answers.apiKey;
+      } else {
+        const answers = await inquirer.prompt([
+          {
+            type: "password",
+            name: "apiKey",
+            message: `Digite sua API Key para ${provider}:
 `,
-          mask: "*",
-        },
-      ]);
-      apiKey = answers.apiKey;
+            mask: "*",
+          },
+        ]);
+        apiKey = answers.apiKey;
+      }
     }
     if (apiKey && apiKey !== currentConfig.apiKey) {
       setConfig("apiKey", apiKey);
@@ -85,13 +97,14 @@ export const configCommand = new Command("config")
 
     let model = options.model || currentConfig.model;
     if (!model) {
+      const defaultModel = provider === AIProvider.Ollama ? "llama3" : (currentConfig.model || "gpt-4o");
       const answers = await inquirer.prompt([
         {
           type: "input",
           name: "model",
-          message: `Qual modelo você gostaria de usar para ${provider}? (ex: gpt-4o, gemini-pro)
+          message: `Qual modelo você gostaria de usar para ${provider}? (ex: ${provider === AIProvider.Ollama ? 'llama3, mistral' : 'gpt-4o, gemini-pro'})
 `,
-          default: currentConfig.model || "gpt-4o",
+          default: defaultModel,
         },
       ]);
       model = answers.model;
