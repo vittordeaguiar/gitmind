@@ -2,6 +2,8 @@
 
 # GitMind
 
+[![npm version](https://img.shields.io/npm/v/gitmind.svg)](https://www.npmjs.com/package/gitmind)
+
 GitMind é uma ferramenta de interface de linha de comando (CLI) projetada para automatizar a geração de Conventional Commits utilizando Inteligência Artificial. Ela analisa as alterações preparadas (staged) no seu repositório git e utiliza Grandes Modelos de Linguagem (LLMs) para propor mensagens de commit concisas e padronizadas.
 
 A ferramenta suporta múltiplos provedores de IA, incluindo Google Gemini, OpenAI e inferência local via Ollama, tornando-a adaptável a diversos fluxos de trabalho e requisitos de privacidade.
@@ -126,3 +128,7 @@ Para contribuir ou modificar o código-fonte, siga estas etapas:
    ```bash
    npm start -- gen
    ```
+
+## Licença
+
+Este projeto está licenciado sob a [Licença ISC](./LICENSE).

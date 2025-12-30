@@ -46,13 +46,14 @@ describe('AIService', () => {
   it('should generate and parse commit message', async () => {
     aiService = new AIServiceImpl(mockConfig);
     const diff = 'diff content';
+    const branch = 'feature/test';
 
-    const result = await aiService.generateCommitMessage(diff);
+    const result = await aiService.generateCommitMessage(diff, branch);
 
     expect(mockProviderInstance).toHaveBeenCalledWith('gpt-4o');
     expect(generateText).toHaveBeenCalledWith(expect.objectContaining({
       model: mockModelObject,
-      prompt: expect.stringContaining(diff),
+      prompt: expect.stringContaining(`Branch atual: ${branch}`),
     }));
     expect(result).toEqual({
       type: 'feat',

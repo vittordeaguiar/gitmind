@@ -45,12 +45,16 @@ export class AIServiceImpl implements IAIService {
     }
   }
 
-  async generateCommitMessage(diff: string): Promise<CommitMessage> {
+  async generateCommitMessage(diff: string, branchName?: string): Promise<CommitMessage> {
     try {
+      const prompt = `Analise o seguinte diff e gere uma mensagem de commit.${
+        branchName ? `\nBranch atual: ${branchName}` : ""
+      }\n\n${diff}`;
+
       const result = await generateText({
         model: (this.aiClient as any)(this.config.model),
         system: SYSTEM_PROMPT,
-        prompt: `Analise o seguinte diff e gere uma mensagem de commit:\n\n${diff}`,
+        prompt: prompt,
       });
 
       const commitMessageRaw = result.text.trim();

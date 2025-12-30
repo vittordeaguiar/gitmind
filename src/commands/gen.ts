@@ -26,6 +26,7 @@ export const genCommand = new Command("gen")
 
       spinner.start("Analisando mudanças staged...");
       const diff = await gitService.getStagedDiff();
+      const branchName = await gitService.getBranchName();
 
       if (!diff || diff.trim().length === 0) {
         spinner.fail("Nenhuma mudança staged encontrada.");
@@ -38,7 +39,7 @@ export const genCommand = new Command("gen")
         spinner.start("GitMind está pensando...");
         let commitMessage: CommitMessage;
         try {
-          commitMessage = await aiService.generateCommitMessage(diff);
+          commitMessage = await aiService.generateCommitMessage(diff, branchName);
           spinner.succeed("Sugestão gerada!");
         } catch (aiError: any) {
           spinner.fail(`Erro na IA: ${aiError.message}`);
