@@ -34,91 +34,98 @@ export const genCommand = new Command("gen")
       }
       spinner.succeed("Mudanças analisadas.");
 
-      spinner.start("GitMind está pensando...");
-      let commitMessage: CommitMessage;
-      try {
-        commitMessage = await aiService.generateCommitMessage(diff);
-        spinner.succeed("Sugestão gerada!");
-      } catch (aiError: any) {
-        spinner.fail(`Erro na IA: ${aiError.message}`);
-        return;
-      }
+      while (true) {
+        spinner.start("GitMind está pensando...");
+        let commitMessage: CommitMessage;
+        try {
+          commitMessage = await aiService.generateCommitMessage(diff);
+          spinner.succeed("Sugestão gerada!");
+        } catch (aiError: any) {
+          spinner.fail(`Erro na IA: ${aiError.message}`);
+          return;
+        }
 
-      console.log(chalk.bold("\n--------------------------------------------------"));
-      console.log(
-        chalk.whiteBright(
-          `${commitMessage.type}${commitMessage.scope ? `(${commitMessage.scope})` : ""}: ${
-            commitMessage.subject
-          }`
-        )
-      );
-      if (commitMessage.body) console.log(chalk.dim(`\n${commitMessage.body}`));
-      if (commitMessage.footer) console.log(chalk.dim(`\n${commitMessage.footer}`));
-      console.log(chalk.bold("--------------------------------------------------\n"));
+        console.log(chalk.bold("\n--------------------------------------------------"));
+        console.log(
+          chalk.whiteBright(
+            `${commitMessage.type}${commitMessage.scope ? `(${commitMessage.scope})` : ""}: ${
+              commitMessage.subject
+            }`
+          )
+        );
+        if (commitMessage.body) console.log(chalk.dim(`\n${commitMessage.body}`));
+        if (commitMessage.footer) console.log(chalk.dim(`\n${commitMessage.footer}`));
+        console.log(chalk.bold("--------------------------------------------------\n"));
 
-      const { action } = await inquirer.prompt([
-        {
-          type: "list",
-          name: "action",
-          message: "O que deseja fazer?",
-          choices: [
-            { name: "Confirmar e Commitar", value: "commit" },
-            { name: "Editar Mensagem", value: "edit" },
-            { name: "Gerar Novamente (Ainda não implementado.)", value: "regenerate" },
-            { name: "Cancelar", value: "cancel" },
-          ],
-        },
-      ]);
-
-      if (action === "cancel") {
-        console.log(chalk.yellow("Operação cancelada."));
-        return;
-      }
-
-      if (action === "edit") {
-        const { type, scope, subject, body, footer } = await inquirer.prompt([
-          { type: "input", name: "type", message: "Type:", default: commitMessage.type },
-          { type: "input", name: "scope", message: "Scope:", default: commitMessage.scope },
-          { type: "input", name: "subject", message: "Subject:", default: commitMessage.subject },
+        const { action } = await inquirer.prompt([
           {
-            type: "editor",
-            name: "body",
-            message: "Body (enter para abrir editor):",
-            default: commitMessage.body,
-          },
-          { type: "input", name: "footer", message: "Footer:", default: commitMessage.footer },
-        ]);
-
-        commitMessage = {
-          type,
-          scope,
-          subject,
-          body: body.trim(),
-          footer: footer.trim(),
-          isBreakingChange: commitMessage.isBreakingChange,
-        };
-      }
-
-      if (action === "commit" || action === "edit") {
-        await gitService.commit(commitMessage);
-
-        const { shouldPush } = await inquirer.prompt([
-          {
-            type: "confirm",
-            name: "shouldPush",
-            message: "Deseja fazer push das suas mudanças agora?",
-            default: true,
+            type: "list",
+            name: "action",
+            message: "O que deseja fazer?",
+            choices: [
+              { name: "Confirmar e Commitar", value: "commit" },
+              { name: "Editar Mensagem", value: "edit" },
+              { name: "Gerar Novamente", value: "regenerate" },
+              { name: "Cancelar", value: "cancel" },
+            ],
           },
         ]);
 
-        if (shouldPush) {
-          spinner.start("Realizando push...");
-          try {
-            await gitService.push();
-            spinner.succeed("Push realizado com sucesso!");
-          } catch (error: any) {
-            spinner.fail(`Erro ao realizar push: ${error.message}`);
+        if (action === "regenerate") {
+          continue;
+        }
+
+        if (action === "cancel") {
+          console.log(chalk.yellow("Operação cancelada."));
+          return;
+        }
+
+        if (action === "edit") {
+          const { type, scope, subject, body, footer } = await inquirer.prompt([
+            { type: "input", name: "type", message: "Type:", default: commitMessage.type },
+            { type: "input", name: "scope", message: "Scope:", default: commitMessage.scope },
+            { type: "input", name: "subject", message: "Subject:", default: commitMessage.subject },
+            {
+              type: "editor",
+              name: "body",
+              message: "Body (enter para abrir editor):",
+              default: commitMessage.body,
+            },
+            { type: "input", name: "footer", message: "Footer:", default: commitMessage.footer },
+          ]);
+
+          commitMessage = {
+            type,
+            scope,
+            subject,
+            body: body.trim(),
+            footer: footer.trim(),
+            isBreakingChange: commitMessage.isBreakingChange,
+          };
+        }
+
+        if (action === "commit" || action === "edit") {
+          await gitService.commit(commitMessage);
+
+          const { shouldPush } = await inquirer.prompt([
+            {
+              type: "confirm",
+              name: "shouldPush",
+              message: "Deseja fazer push das suas mudanças agora?",
+              default: true,
+            },
+          ]);
+
+          if (shouldPush) {
+            spinner.start("Realizando push...");
+            try {
+              await gitService.push();
+              spinner.succeed("Push realizado com sucesso!");
+            } catch (error: any) {
+              spinner.fail(`Erro ao realizar push: ${error.message}`);
+            }
           }
+          break;
         }
       }
     } catch (error: any) {
