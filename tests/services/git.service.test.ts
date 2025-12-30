@@ -13,6 +13,7 @@ describe('GitService', () => {
       diff: vi.fn(),
       commit: vi.fn(),
       push: vi.fn(),
+      branchLocal: vi.fn(),
     };
     (simpleGit as any).mockReturnValue(mockGit);
     gitService = new GitServiceImpl();
@@ -35,6 +36,20 @@ describe('GitService', () => {
       await expect(gitService.getStagedDiff()).rejects.toThrow(
         'Failed to get staged changes: No staged changes found. Please stage your changes before generating a commit message.'
       );
+    });
+  });
+
+  describe('getBranchName', () => {
+    it('should return current branch name', async () => {
+      mockGit.branchLocal.mockResolvedValue({ current: 'main' });
+      const branch = await gitService.getBranchName();
+      expect(branch).toBe('main');
+    });
+
+    it('should return empty string on error', async () => {
+      mockGit.branchLocal.mockRejectedValue(new Error('git error'));
+      const branch = await gitService.getBranchName();
+      expect(branch).toBe('');
     });
   });
 

@@ -25,6 +25,16 @@ export class GitServiceImpl implements GitService {
     }
   }
 
+  async getBranchName(): Promise<string> {
+    try {
+      const branchSummary = await this.git.branchLocal();
+      return branchSummary.current;
+    } catch (error: any) {
+      console.warn("Could not determine branch name:", error.message);
+      return "";
+    }
+  }
+
   async commit(message: CommitMessage): Promise<void> {
     try {
       let header = `${message.type}${message.scope ? "(" + message.scope + ")" : ""}`;
