@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import inquirer from "inquirer";
+import ora from "ora";
 import { GitServiceImpl } from "../services/git.service.js";
 import { AIServiceImpl } from "../services/ai.service.js";
 import { getConfig, hasValidConfig } from "../utils/config.js";
@@ -9,6 +10,7 @@ import { CommitMessage } from "../core/types.js";
 export const genCommand = new Command("gen")
   .description("Gera uma sugestão de commit baseada no staged diff")
   .action(async () => {
+    const spinner = ora();
     try {
       if (!hasValidConfig()) {
         console.log(chalk.yellow("Configuração não encontrada ou incompleta."));
@@ -22,26 +24,27 @@ export const genCommand = new Command("gen")
       const gitService = new GitServiceImpl();
       const aiService = new AIServiceImpl(config);
 
-      console.log(chalk.dim("🔍 Analisando mudanças staged..."));
+      spinner.start("Analisando mudanças staged...");
       const diff = await gitService.getStagedDiff();
 
       if (!diff || diff.trim().length === 0) {
-        console.log(chalk.yellow("Nenhuma mudança staged encontrada."));
+        spinner.fail("Nenhuma mudança staged encontrada.");
         console.log('Use "git add <arquivos>" antes de rodar este comando.');
         return;
       }
+      spinner.succeed("Mudanças analisadas.");
 
-      console.log(chalk.blue("GitMind está pensando..."));
+      spinner.start("GitMind está pensando...");
       let commitMessage: CommitMessage;
       try {
         commitMessage = await aiService.generateCommitMessage(diff);
+        spinner.succeed("Sugestão gerada!");
       } catch (aiError: any) {
-        console.error(chalk.red(`Erro na IA: ${aiError.message}`));
+        spinner.fail(`Erro na IA: ${aiError.message}`);
         return;
       }
 
-      console.log(chalk.green("Sugestão gerada:"));
-      console.log(chalk.bold("--------------------------------------------------"));
+      console.log(chalk.bold("\n--------------------------------------------------"));
       console.log(
         chalk.whiteBright(
           `${commitMessage.type}${commitMessage.scope ? `(${commitMessage.scope})` : ""}: ${
@@ -109,10 +112,17 @@ export const genCommand = new Command("gen")
         ]);
 
         if (shouldPush) {
-          await gitService.push();
+          spinner.start("Realizando push...");
+          try {
+            await gitService.push();
+            spinner.succeed("Push realizado com sucesso!");
+          } catch (error: any) {
+            spinner.fail(`Erro ao realizar push: ${error.message}`);
+          }
         }
       }
     } catch (error: any) {
+      spinner.stop();
       console.error(chalk.red(`Ocorreu um erro inesperado: ${error.message}`));
     }
   });

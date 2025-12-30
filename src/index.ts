@@ -1,6 +1,8 @@
+#!/usr/bin/env node
 import { Command } from "commander";
 import { genCommand } from "./commands/gen.js";
 import { configCommand } from "./commands/config.js"; // Será implementado no próximo passo
+import { listCommand } from "./commands/list.js";
 
 const program = new Command();
 
@@ -11,5 +13,6 @@ program
 
 program.addCommand(genCommand);
 program.addCommand(configCommand);
+program.addCommand(listCommand);
 
 program.parse();

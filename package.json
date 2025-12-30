@@ -4,6 +4,9 @@
   "type": "module",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "gitmind": "./dist/index.js"
+  },
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",
@@ -23,6 +26,7 @@
     "conf": "^15.0.2",
     "inquirer": "^9.2.15",
     "ollama-ai-provider": "^1.2.0",
+    "ora": "^9.0.0",
     "simple-git": "^3.30.0"
   },
   "devDependencies": {
