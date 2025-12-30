@@ -128,4 +128,7 @@ To contribute or modify the source code, follow these steps:
    ```bash
    npm start -- gen
    ```
+
+## Entre em contato comigo para melhorias ou dúvidas!
+
 ## License\n\nThis project is licensed under the [ISC License](./LICENSE).
